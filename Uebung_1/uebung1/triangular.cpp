@@ -6,20 +6,20 @@
 #include <string>
 
 
-int triangular(int number)
-{	// int trisum = 0;
+int triangular(int number){
 	// ToDo: Exercise 1.a - return triangular number
-	/* for (int i = 0; i <= number; i++) {
+	int trisum = 0;
+	for (int i = 0; i <= number; i++) {
 			trisum += i;
 	}
-	return trisum; */
-	return ( number * (number +1) ) / 2;
+	return trisum;
+	//return ( number * (number +1) ) / 2;
 }
 
 void pretty_print(int decimal)
 {
 	
-	decimal = triangular(decimal);
+	//decimal = triangular(decimal);
 	// ToDo: Exercise 1.c - print number with decimal marks to console
 	std::string decimal_string = std::to_string(decimal);
 	
@@ -45,17 +45,17 @@ int main(int argc, char * argv[])
 	// ToDo: Exercise 1.b - check if n is in domain, if not print valid domain and codomain and return 2
 	
 	//Gaußsche Summenformel und quadratische Ergänzung
-	constexpr  unsigned long max_n = (unsigned long) floor( sqrt( ( 2.0 * INT_MAX ) + (1.0/4.0) ) - (1.0/2.0) ) ;
-    constexpr unsigned long max_tri = triangular( max_n );
+	long max_n = (long) floor( sqrt( ( 2.0 * INT_MAX ) + (1.0/4.0) ) - (1.0/2.0) ) ;
+    long max_tri = triangular( max_n );
 
 	
-	if ( n > max_n ) {
-		std::cout << "domain = [<0>;<"<< max_n << ">] , codomain = [<0>;<" << max_tri << ">]\n";
+	if ( n <= max_n && n > 1 ) {
+		pretty_print( triangular( n ) );
 	} else {
-	
+		std::cout << "domain = [<1>;<" << max_n << ">] , codomain = [<1>;<" << max_tri << ">]\n";
 	// ToDo: Exercise 1.a - print triangular number to console
-	std::cout << "max_n" << max_n << " and " << max_tri <<"\n";
-	pretty_print( n );
+	//std::cout << "max_n " << max_n << " and max_tri  " << max_tri <<"\n";
+	
 	
 	}
 	
