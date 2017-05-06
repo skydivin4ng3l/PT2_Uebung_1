@@ -28,8 +28,8 @@ int main(int argc, char * argv[]){
 
 	int due = std::stoi(argv[1]);
 	int paid = std::stoi(argv[2]);
-	std::ostream os(NULL);
-	std::filebuf fb;
+	std::ostream* os = NULL;
+	std::ofstream file;
 
 
 	if(due > paid){
@@ -38,7 +38,7 @@ int main(int argc, char * argv[]){
 	}
 
 	if(argc == 3){
-
+		os = &std::cout;
 
 	}
 
@@ -48,16 +48,16 @@ int main(int argc, char * argv[]){
 			return 1;
 		}
 		std::string filename = argv[4];
-	  fb.open(filename + ".txt",std::ios::out); //Annahme Textdatei meinte .txt Datei
-	 	os.rdbuf(&fb);
+		file.open(filename + ".txt",std::ios::out); //Annahme Textdatei meinte .txt Datei
+	 	os = &file;
 	}
 
 	// ToDo: catch invalid arguments
 
-	change(due, paid, os);
+	change(due, paid, *os);
 
 	if (argc == 5) {
-		fb.close();
+		file.close();
 	}
 	return 0;
 }
