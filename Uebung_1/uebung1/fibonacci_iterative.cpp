@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 
-int number_of_summations = 0;
+int count = 0;
 
 int fibonacci(int number)
 {
@@ -18,7 +18,7 @@ int fibonacci(int number)
 			current = previous + pre_previous;
 			pre_previous = previous;
 			previous = current;
-			number_of_summations++;
+			count++;
 		}
 
 		return current;
@@ -34,7 +34,8 @@ int main(int argc, char * argv[])
 
 	// ToDo: Exercise 2.c - print calculation steps
 
-	std::cout << n << " : " << fibonacci(n) << " : #" << number_of_summations << "\n";
+	std::cout << n << " : " << fibonacci(n) << " : #";
+	std::cout << count << std::endl;
 
 	return 0;
 }

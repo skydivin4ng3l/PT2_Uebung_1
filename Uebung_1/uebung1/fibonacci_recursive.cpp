@@ -2,12 +2,12 @@
 #include <cstdlib>
 #include <iostream>
 
-int number_of_summations = 0;
+int count = 0;
 
 int fibonacci(int number)
 {
 	// ToDo: Exercise 2.c - count number of calculation steps
-	number_of_summations++;
+	count++;
 	// ToDo: Exercise 2.a - return 0 on bad arguments
 	if( number < 1 || number > 46 ) {
 		return 0;
@@ -31,7 +31,8 @@ int main(int argc, char * argv[])
 
 	// ToDo: Exercise 2.c - print calculation steps
 
-	std::cout << n << " : " << fibonacci(n) << " : #" << number_of_summations << "\n";
+	std::cout << n << " : " << fibonacci(n) << " : #";
+	std::cout << count << std::endl;
 
 	return 0;
 }
