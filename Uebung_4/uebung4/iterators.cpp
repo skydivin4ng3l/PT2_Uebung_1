@@ -52,49 +52,40 @@ void remove_duplicates(T& container)
 template<class T>
 void insert_differences(T& container)
 {
-	//prepare iterators for front and middle section
+	//prepare support variables and container
 	auto container_old_size = container.size();
-	container.reserve(container_old_size * 3);
-	auto end_old_it = container.end();
 
-	auto begin_middle_it = container.begin();
-	begin_middle_it = std::next(begin_middle_it, container_old_size);
-	container.resize(container_old_size*2);
-	auto end_middle_it = container.end();
+	T dif_container;
+	dif_container.resize(container_old_size);
 
 	//copy and prep for adjacent diff
-	std::copy_backward(container.begin(), container.end()-container_old_size, container.end());
-	container.push_back(*container.begin());
+	std::copy(container.begin(), container.end(), dif_container.begin());
+	dif_container.push_back(*container.begin()); //add first element to end for circular diff behavior
+	
+	//transform support container to adjacent diff / lookup container 
+	std::adjacent_difference(dif_container.begin(), dif_container.end(), dif_container.begin());
+	dif_container.erase(dif_container.begin()); //remove by adjacent diff unchanged element
 
-	//transform midsection to adjacent diff 
-	std::adjacent_difference(container.begin() + container_old_size, container.end(), container.begin() + container_old_size);
-	container.erase(container.begin()+container_old_size);
+	container.resize(container_old_size*3);
 
-	//increase container size to full and generate ooposite diffs and move everything in place
-	container.resize(container.size() + container_old_size);
-
-	// thos iterators seam not to work as intended,...totally unclear
-	auto rev_dif_it = std::next(std::rbegin(container), container_old_size - 1);
-	auto rev_old_it = container.rbegin() + (container_old_size*2 - 1);
+	// traversal iterators
+	auto rev_dif_it = dif_container.rbegin();
+	auto rev_old_it = container.rbegin() + (container_old_size*2);
 	auto rev_new_it = container.rbegin();
 
-	printContainer(container);
-	
-	std::cout << "rev_dif_it " << *rev_dif_it << std::endl;
-	std::cout << "rev_old_it " << *rev_old_it << std::endl;
-	std::cout << "rev_new_it " << *rev_new_it << std::endl;
 	//fix circular end
 	*(rev_new_it++) = *(rev_dif_it++);
 
-	while (rev_new_it != std::next(container.rend(),1) )
+	while (rev_new_it + 2 != container.rend())
 	{
-		/**(rev_new_it++) = *(rev_old_it++);
-		*(rev_new_it++) = (*rev_dif_it) * (-1);
-		*(rev_new_it++) = *(rev_dif_it++);*/
+		*(rev_new_it++) = *(rev_old_it++);
+		*(rev_new_it++) = -(*rev_dif_it);
+		*(rev_new_it++) = *(rev_dif_it++);
 	}
 
 	//fix circular begin
-	/**container.begin() = (*container.end()) * (-1);*/
+	*rev_new_it = *rev_old_it;
+	*container.begin() = -*( container.begin()+(container.size()-1) );
 
 
 	//-----------------can not adanve iterator vector + offset error?!?!??!
