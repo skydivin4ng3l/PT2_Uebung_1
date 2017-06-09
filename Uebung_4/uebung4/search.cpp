@@ -94,14 +94,14 @@ int linearSearch(int destID, std::vector<Route>& routes, long long& numLookups)
 // Use std::chrono for time measurement.
 std::pair<long long, long long> evaluateLinearSearch(std::vector<Route>& routes)
 {
-	auto start_time = std::chrono::system_clock::now();
 	long long numLookups = 0;
 	long long duration = 0;
+	auto start_time = std::chrono::system_clock::now();
 
-	std::for_each(routes.begin(), routes.end(), [numLookups, routes](Route& current_route) { linearSearch(current_route.destinationId, routes, numLookups)})
+	std::for_each(routes.begin(), routes.end(), [&numLookups, &routes](Route& current_route) { linearSearch(current_route.destinationId, routes, numLookups); });
 
 	auto end_time = std::chrono::system_clock::now();
-	duration = end_time - start_time;
+	duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time).count();
 
 	return std::make_pair(numLookups, duration);
 }
