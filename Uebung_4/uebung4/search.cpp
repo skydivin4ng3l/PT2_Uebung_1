@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <numeric>
 #include <chrono>
+#include <cassert>
 
 struct Route
 {
@@ -68,7 +69,10 @@ void importRoutesData(char* path, std::vector<Route>& routes)
 		}
 
 		if (route.airlineId > -1 && route.sourceId > -1 && route.destinationId > -1)
+		{
 			routes.push_back(route);
+			//std::cout <<"Routes size: "<< routes.size() <<std::endl;
+		}
 	}
 }
 
@@ -114,41 +118,70 @@ std::pair<long long, long long> evaluateLinearSearch(std::vector<Route>& routes)
 // The vector should have been sorted before calling this function.
 int binarySearch(int destID, std::vector<Route>& routes, long long& numLookups)
 {
+	assert(routes.size() != 0);
 	std::sort(routes.begin(), routes.end(), [](Route& first_route, Route& second_route) {return first_route.destinationId < second_route.destinationId; });
 	
+	/*std::cout << "storted print begins..." << std::endl;
+	for (auto current : routes)
+	{
+		std::cout << current.destinationId << std::endl;
+	}
+	std::cout << "....storted print ends" << std::endl;*/
+
+
+	//std::lower_bound could be useful
 	int mRoutes = 0;
 	int step = routes.size()/2;
+	/*std::cout << "Step: " << step << std::endl;*/
 	auto search_iterator = std::next(routes.begin(),step);
 
+	std::cout << "Search for destID: " << destID << std::endl;
 	//find the range where the correct destID can be found,
 	while (search_iterator->destinationId != destID )
 	{
 		step /= 2;
-		if (search_iterator->destinationId < destID)
+		/*std::cout << "Step: " << step << std::endl;
+		std::cout << "Search Iterator points to: " << search_iterator->destinationId << std::endl;*/
+		if (search_iterator->destinationId < destID && step != 0)
 		{
 			search_iterator = std::next(search_iterator, step );
 		} 
-		else if (search_iterator->destinationId > destID)
+		else if (search_iterator->destinationId > destID && step !=0)
 		{
 			search_iterator = std::prev(search_iterator, step);
 		}
+		else if (step == 0)
+		{
+			while (search_iterator->destinationId < destID && search_iterator != routes.end()-1)
+			{
+				search_iterator = std::next(search_iterator);
+			}
+
+			while (search_iterator->destinationId > destID && search_iterator != routes.begin())
+			{
+				search_iterator = std::prev(search_iterator);
+			}
+
+			std::cerr << "DestID: " << destID << " can not be found!" << std::endl;
+			break;
+		}
 	}
-	
+	std::cout << "Search Iterator points to: " << search_iterator->destinationId << " and DestID was "<< destID << std::endl;
 	////find range ends and count
-	//auto start_iterator = search_iterator;
-	//auto end_iterator = std::next(search_iterator);
+	auto start_iterator = search_iterator;
+	auto end_iterator = search_iterator;
 
-	//while (start_iterator->destinationId == destID)
-	//{
-	//	start_iterator = std::prev(start_iterator);
-	//	mRoutes++;
-	//}
+	while (start_iterator->destinationId == destID && start_iterator != routes.begin() )
+	{
+		start_iterator = std::prev(start_iterator);
+		mRoutes++;
+	}
 
-	//while (end_iterator->destinationId == destID)
-	//{
-	//	end_iterator = std::next(end_iterator);
-	//	mRoutes++;
-	//}
+	while (end_iterator->destinationId == destID && end_iterator != routes.end()-1)
+	{
+		end_iterator = std::next(end_iterator);
+		mRoutes++;
+	}
 
 	return mRoutes;
 }
