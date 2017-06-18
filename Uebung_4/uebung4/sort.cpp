@@ -22,22 +22,40 @@ void merge(T leftIt, T midIt, T rightIt)
 	assert(leftIt <= midIt && midIt <= rightIt);
 
 	std::vector<typename T::value_type> mergedValues(rightIt - leftIt);
+
+	auto writeIt = leftIt;
+	auto constMidIt = midIt;
+
+	//take smallest and put it into the merged container
+	for(int i = 0; i<mergedValues.size(); i++){
+		if(midIt == rightIt)							//right part already empty
+			mergedValues[i] = *(leftIt++);
+		else if(leftIt == constMidIt)			//leftpart already empty
+			mergedValues[i] = *(midIt++);
+		else if(*leftIt <= *midIt)				//if in both parts elements left and left one is smaller or equal
+			mergedValues[i] = *(leftIt++);
+		else if(*midIt < *leftIt)					//if in both parts elements left and right one is smaller
+			mergedValues[i] = *(midIt++);
+	}
+
+	for(int i=0; i<mergedValues.size(); i++)
+		*(writeIt++) = mergedValues[i];
+
 }
+
 
 // Todo 4.4 - Sort the given container using merge sort.
 template<class T>
 void mergeSort(T leftIt, T rightIt)
 {
 	assert(leftIt < rightIt);
-	int vector_size = std::distance(leftIt, rightIt);
-	auto midIt = std::advance(leftIt, vector_size / 2);
 
-	std::cout << "leftIt: " << *leftIt << " midIt: " << *midIt << " rightIt: " << *rightIt << std::endl;
+	if(std::distance(leftIt,rightIt)!=1){
+		auto midIt = leftIt + (std::distance(leftIt,rightIt)+1)/2;
 
-	//one element vector
-	if (vector_size == 1)
-	{
-
+		mergeSort(leftIt,midIt);
+		mergeSort(midIt,rightIt);
+		merge(leftIt,midIt,rightIt);
 	}
 
 }
