@@ -1,5 +1,0 @@
-S:/OneDrive/PT2/Uebung/Uebung_3/uebung3/build/CMakeFiles/edit_cache.dir
-S:/OneDrive/PT2/Uebung/Uebung_3/uebung3/build/CMakeFiles/exceptions.dir
-S:/OneDrive/PT2/Uebung/Uebung_3/uebung3/build/CMakeFiles/rebuild_cache.dir
-S:/OneDrive/PT2/Uebung/Uebung_3/uebung3/build/CMakeFiles/genetic-tsp.dir
-S:/OneDrive/PT2/Uebung/Uebung_3/uebung3/build/CMakeFiles/airports.dir

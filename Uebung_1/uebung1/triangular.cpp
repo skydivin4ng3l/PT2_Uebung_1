@@ -2,10 +2,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <climits>
-
 #include <cmath>
 #include <string>
-
 
 
 int triangular(int number){
@@ -32,7 +30,7 @@ void pretty_print(int decimal)
 			decimal_string.insert( string_length - i , ".");  // additional character should not interfier with the calculated position of the next "."
 		}
 	}
-	std::cout << decimal_string << std::endl;
+	std::cout << decimal_string;
 }
 
 int main(int argc, char * argv[])
@@ -51,16 +49,14 @@ int main(int argc, char * argv[])
     long max_tri = triangular( max_n );
 
 	
-	if ( n <= max_n && n >= 1 ) {
+	if ( n <= max_n && n > 1 ) {
 		pretty_print( triangular( n ) );
-		std::cout << std::numeric_limits<unsigned long>::max() << std::endl;
-		std::cout << std::numeric_limits<unsigned long long>::max();
 	} else {
 		std::cout << "domain = [<1>;<" << max_n << ">] , codomain = [<1>;<" << max_tri << ">]\n";
 	// ToDo: Exercise 1.a - print triangular number to console
 	//std::cout << "max_n " << max_n << " and max_tri  " << max_tri <<"\n";
 	
-		
+	
 	}
 	
 	return 0;

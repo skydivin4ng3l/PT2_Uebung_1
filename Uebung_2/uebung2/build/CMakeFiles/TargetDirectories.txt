@@ -1,4 +1,0 @@
-S:/OneDrive/PT2/Uebung/Uebung_2/uebung2/build/CMakeFiles/dfa.dir
-S:/OneDrive/PT2/Uebung/Uebung_2/uebung2/build/CMakeFiles/fileio.dir
-S:/OneDrive/PT2/Uebung/Uebung_2/uebung2/build/CMakeFiles/edit_cache.dir
-S:/OneDrive/PT2/Uebung/Uebung_2/uebung2/build/CMakeFiles/rebuild_cache.dir
