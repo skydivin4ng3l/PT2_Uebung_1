@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+S:/OneDrive/PT2/Uebung/Uebung_3/uebung3/exceptions.cpp
+iostream
+-
+fstream
+-
+string
+-
+sstream
+-
+cfloat
+-
+iomanip
+-
+vector
+-
+ctime
+-
+

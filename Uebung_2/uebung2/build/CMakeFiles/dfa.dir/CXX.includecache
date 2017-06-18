@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+S:/OneDrive/PT2/Uebung/Uebung_2/uebung2/dfa.cpp
+iostream
+-
+string
+-
+vector
+-
+sstream
+-
+

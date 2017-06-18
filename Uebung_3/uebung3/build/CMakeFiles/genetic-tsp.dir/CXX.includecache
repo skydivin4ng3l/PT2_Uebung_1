@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+S:/OneDrive/PT2/Uebung/Uebung_3/uebung3/genetic-tsp.cpp
+vector
+-
+iostream
+-
+fstream
+-
+cstdlib
+-
+cassert
+-
+random
+-
+algorithm
+-
+iterator
+-
+limits
+-
+string
+-
+ctime
+-
+

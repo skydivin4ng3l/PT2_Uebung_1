@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <iostream>
 
-int count = 0;
+unsigned long count = 0;
 
 int fibonacci(int number)
 {
