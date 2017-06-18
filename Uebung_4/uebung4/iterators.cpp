@@ -45,7 +45,8 @@ void remove_duplicates(T& container)
 {
 	std::sort(container.begin(), container.end());
 	container.erase(std::unique(container.begin(), container.end()),
-					container.end());
+						container.end()
+					);
 }
 
 // Todo 4.2c - Expand the given container by inserting the numerical differences of each element to its neighbors. Do *not* use the []-operator.
@@ -64,7 +65,8 @@ void insert_differences(T& container)
 	
 	//transform support container to adjacent diff / lookup container 
 	std::adjacent_difference(dif_container.begin(), dif_container.end(), dif_container.begin());
-	dif_container.erase(dif_container.begin()); //remove by adjacent diff unchanged element
+	//remove by adjacent diff unchanged element
+	dif_container.erase(dif_container.begin()); 
 
 	container.resize(container_old_size*3);
 
@@ -85,55 +87,7 @@ void insert_differences(T& container)
 
 	//fix circular begin
 	*rev_new_it = *rev_old_it;
-	*container.begin() = -*( container.begin()+(container.size()-1) );
-
-
-	//-----------------can not adanve iterator vector + offset error?!?!??!
-	/*auto temp = *(container.end() - 1) - *container.begin();
-
-	auto emplace_it = container.begin();
-	container.emplace(emplace_it, temp);
-	std::next(emplace_it, 2);
-	*emplace_it = 99;
-	auto input_it = container.begin()+1;
-	temp = *(emplace_it++) - *(input_it++);
-	container.emplace(emplace_it, temp);
-
-	while (input_it != container.end())
-	{
-		temp = *(emplace_it++) - *(input_it);
-		container.emplace(emplace_it, temp);
-		temp = *(input_it++) - *emplace_it;
-		container.emplace(emplace_it, temp);
-		input_it + 2;
-		emplace_it + 2;
-	}
-
-	temp = *(container.begin() + 1) - *container.end();
-	container.push_back(temp);*/
-	//----------------------------------------------------------------------
-
-	//container.reserve(container.size() * 3);
-	//auto input_rev_old_it = container.rbegin();
-
-	//container.resize(container.size() * 3);
-	//auto output_rev_new_it = container.rbegin();
-
-	//Special case end value difference  begin-end
-	//*(output_rev_new_it++) = *container.begin() - *input_rev_old_it;
-	//*(output_rev_new_it++) = *input_rev_old_it;
-
-	//while (input_rev_old_it != container.rend()-1)
-	//{
-	//	if (input_rev_old_it == container.rend() - 1) break;
-	//	*(output_rev_new_it++) = *(--input_rev_old_it) - *(++input_rev_old_it++);
-	//	/*if (input_rev_old_it == container.rend() - 1) break;
-	//	*(output_rev_new_it++) = *input_rev_old_it;*/
-	//}
-
-	//Special case end value difference  end-begin
-	//*output_rev_new_it = *(container.end()-1) - *input_rev_old_it;
-	
+	*container.begin() = -*( container.begin()+(container.size()-1) );	
 }
 
 void testFrontBackPairingFunctionality()
