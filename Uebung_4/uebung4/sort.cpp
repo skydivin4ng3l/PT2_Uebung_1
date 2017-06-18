@@ -21,7 +21,7 @@ void merge(T leftIt, T midIt, T rightIt)
 {
 	assert(leftIt <= midIt && midIt <= rightIt);
 
-	std::vector<T::value_type> mergedValues(rightIt - leftIt);
+	std::vector<typename T::value_type> mergedValues(rightIt - leftIt);
 }
 
 // Todo 4.4 - Sort the given container using merge sort.
@@ -29,6 +29,17 @@ template<class T>
 void mergeSort(T leftIt, T rightIt)
 {
 	assert(leftIt < rightIt);
+	int vector_size = std::distance(leftIt, rightIt);
+	auto midIt = std::advance(leftIt, vector_size / 2);
+
+	std::cout << "leftIt: " << *leftIt << " midIt: " << *midIt << " rightIt: " << *rightIt << std::endl;
+
+	//one element vector
+	if (vector_size == 1)
+	{
+
+	}
+
 }
 
 int main(int argc, char** argv)
