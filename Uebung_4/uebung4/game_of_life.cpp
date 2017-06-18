@@ -1,7 +1,13 @@
 #include <iostream>
 #include <cstring>
 #include <ctime>
+#include <random>
 #include "bitmap_image.hpp"
+
+// random number in [0,1] range
+inline float frand() {
+	return (float)rand() / (float)RAND_MAX;
+}
 
 struct Raster {
 	Raster(int w, int h) : width(w), height(h)
@@ -12,9 +18,25 @@ struct Raster {
 	Raster(int w, int h, float seedProbability) : width(w), height(h)
 	{
 		data = new int[width*height];
-
+		memset(data,0,sizeof(*data)*width*height);	//Maybe not necessary on each computer but sometimes trouble without
 		// Todo 4.1a: Fill randomly
 		// Probability of value 1 is seedProbability, otherwise value is 0
+
+		for(int i = 0; i<width*height; i++){
+			data[i]=(frand()<=seedProbability)? 1 : 0;
+		}
+
+		//Idea via shuffeling but, amount is not really random
+		// static std::random_device rd;
+		// static std::mt19937 g(rd());
+		//
+		// int amountLiving = (int)(seedProbability * (float)(width * height));
+		// for(int i=0; i < amountLiving; i++){
+		// 	data[i]=1;
+		// }
+		//
+		// std::shuffle(&data[0],&data[(width*height)-1],g);
+
 	}
 
 	Raster(const std::string &filename)
@@ -33,6 +55,22 @@ struct Raster {
 
 		// Todo 4.1a: Load image by using image.get_pixel
 		// A black pixel represents 1, all other values represent 0
+
+		for (int w = 0; w < width; w++) {
+			for (int h = 0; h < height; h++){
+				unsigned char red;
+				unsigned char green;
+				unsigned char blue;
+
+				image.get_pixel(w,h,red,green,blue);
+
+				if (red && green && blue) //Not one is 0 -> can't be black
+					data[h*width+w] = 0;
+				else
+					data[h*width+w] = 1;
+
+			}
+		}
 	}
 
 	void save(const std::string &filename)
@@ -40,6 +78,17 @@ struct Raster {
 		// Todo 4.1a: Save image by using image.set_pixel
 		// Living cells should be stored as black pixels, all other pixels are white
 		bitmap_image image(width, height);
+
+		for (int w=0; w < width; w++){
+			for (int h=0; h < height; h++){
+
+				if (data[h*width+w])
+					image.set_pixel(w,h,0,0,0);
+				else
+					image.set_pixel(w,h,255,255,255);
+
+			}
+		}
 
 		image.save_image(filename);
 	}
@@ -129,13 +178,41 @@ struct CommandLineParameter
 	int maxIterations;
 };
 
+int isAlive(const Raster &raster, int w, int h, bool isTorus){
+	if(isTorus){
+		w = w % raster.width;
+		h = h % raster.height;
+
+		if (w<0)
+			w = w + raster.width;
+		if (h<0)
+			h = h + raster.height;
+	}
+	else if(w<0 || w>=raster.width || h<0 || h>=raster.height)
+		return 0;
+
+	return raster.data[h*raster.width+w];
+}
+
 int neighborValue(const Raster &raster, int x, int y, bool isTorus)
 {
 	// Todo 4.1b: Return number of living neighbors.
 	// In case isTorus is false and (x, y) is outside of raster, return 0
 	// In case isTorus is true and (x, y) is outside of raster use value of matching cell of opposite side
 
-	return 0;
+	int count = 0;
+
+	for(int h=y-1; h<=y+1; h++){
+		for(int w=x-1; w<=x+1; w++){
+
+			if(!(w==x && h==y)){ //don't look at the cell itself
+				count+= isAlive(raster, w, h, isTorus);
+			}
+		//	std::cout << "w " << w << " h " << h << " count " << count << std::endl;
+		}
+	}
+
+	return count;
 }
 
 void simulateInvasion(Raster &raster, float invasionFactor)
@@ -146,11 +223,47 @@ void simulateInvasion(Raster &raster, float invasionFactor)
 	}
 
 	// Todo 4.1c: Flip random some cells (probability to flip for each cell is invasionFactor)
+
+	for(int i = 0; i<raster.width*raster.height; i++){
+		if(frand() <= invasionFactor)
+			raster.data[i] = !raster.data[i] ;
+
+	}
 }
 
 void simulateNextState(Raster &raster, bool isTorus)
 {
 	// Todo 4.1b: Play one iteration of Game of Life
+	// for(int h=0; h<raster.height; h++){
+	// 	for(int w=0;w<raster.width; w++){
+	// 		std::cout << raster.data[h*raster.width+w] << " ";
+	// 	}
+	// 	std::cout << std::endl;
+	// }
+
+
+	int newData[raster.width*raster.height];
+	std::memcpy(&newData, raster.data, sizeof(newData));
+
+	for(int h=0; h<raster.height; h++){
+		for(int w=0;w<raster.width; w++){
+
+			int count = neighborValue(raster, w, h, isTorus);
+			int current = h*raster.width+w;
+
+			if ((count == 2 || count == 3) && raster.data[current]==1)
+				newData[current]=1;
+			else
+				newData[current]=0;
+
+			if (raster.data[current]==0 && count==3)
+				newData[current]=1;
+
+		}
+	}
+
+	std::memcpy(raster.data, &newData, sizeof(newData));
+
 }
 
 int main(int argc, char* argv[])
@@ -158,6 +271,9 @@ int main(int argc, char* argv[])
 	Raster* raster = nullptr;
 
 	// Todo 4.1a: Initialize random seed
+	srand(static_cast<unsigned int>(time(0)));
+	srand(time(NULL));
+
 
 	CommandLineParameter cmd(argc, argv);
 	if (!cmd.patternFilename.empty())
