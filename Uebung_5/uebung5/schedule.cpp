@@ -3,6 +3,7 @@
 #include <time.h>
 #include <vector>
 #include <algorithm>
+#include <string>
 
 
 struct Interval
@@ -27,6 +28,35 @@ const static int N = 20;
 std::ostream & operator<<(std::ostream & os, const std::vector<Interval> & I)
 {
 	// Todo 5.3: Implement a nice print function
+	//blocks
+	char free_slot = '"';
+	char blocked_slot = '#';
+
+	for (auto current_interval : I)
+	{
+		std::string index = (current_interval.index < 10 ? std::to_string(current_interval.index) + " " 
+														 : std::to_string(current_interval.index) );
+		os << "Interval: " << index << " [";
+		//until start
+		for (int slot = 0; slot < current_interval.start; slot++)
+		{
+			os << free_slot;
+		}
+
+		//until end
+		for (int slot = current_interval.start; slot < current_interval.end; slot++)
+		{
+			os << blocked_slot;
+		}
+
+		//until MaxEnd
+		for (int slot = current_interval.end; slot < MaxEnd; slot++)
+		{
+			os << free_slot;
+		}
+
+		os << "]" << std::endl;
+	}
 	os << I.size() << std::endl;
 	return os;
 }
@@ -53,11 +83,26 @@ void schedule(const std::vector<Interval> & intervals)
 
 	// Todo 5.3: Sort intervals
 	auto sorted = intervals;
+	std::sort(sorted.begin(), sorted.end(), [](Interval& first_interval, Interval& second_interval) {return first_interval.end < second_interval.end; });
 
+	std::cout << std::endl << "intervals (sorted):" << std::endl << sorted;
 
 	// Todo 5.3: Implement greedy scheduling
 	auto scheduled = std::vector<Interval>();
 
+	//add the interval with the earliest end time, first interval of sorted will be added anyway
+	Interval last_added_interval = sorted.front();
+	sorted.push_back(sorted.front());
+
+	for (auto current_interval :sorted)
+	{
+		// then check for other valid intervals and skip first
+		if (current_interval.start > last_added_interval.end)
+		{
+			scheduled.push_back(current_interval);
+			last_added_interval = current_interval;
+		}
+	}
 
 	std::cout << std::endl << "intervals (scheduled, " << scheduled.size() << " of " << sorted.size() << " possible)"
 		<< std::endl << scheduled << std::endl;
