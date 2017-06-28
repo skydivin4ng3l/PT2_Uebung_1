@@ -5,8 +5,9 @@
 #include <algorithm>
 #include <limits>
 #include <cassert>
+#include <numeric>
 
-/*
+//*
 // test data: lecture example
 static const auto N = static_cast<size_t>(6);
 static const auto weights_table = std::array<int, N * N>{ {
@@ -18,7 +19,7 @@ static const auto weights_table = std::array<int, N * N>{ {
 	 5,  4,  4,  5,  2, -1 } };
 //*/
 
-//*
+/*
 // test data: city distances
 // vertices are cities
 // edges denote city connections
@@ -119,7 +120,21 @@ void createGraph(std::vector<Edge> & E, std::vector<Vertex> & V)
 	// - every node should be stored only once
 	// - no loops on nodes (edges between single nodes, i.e., edges with weight < 0)
 	// - any edge of nodes a and b is bidirectional, so edge b to a is not required (no duplicates)
+	E.clear();
+	V.clear();
 
+	for(int i=0; i<N; i++){
+		Vertex v(i);
+		V.push_back(v);
+
+		for(int j=0; j<N; j++){
+			Edge e(i,j);
+
+			if(i<j && e.weight>0)
+				E.push_back(e);
+		}
+
+	}
 
 }
 
@@ -127,9 +142,24 @@ void createGraph(std::vector<Edge> & E, std::vector<Vertex> & V)
 int totalWeight(const std::vector<Edge> & E)
 {
 	// Todo 5.1b: total weight accumulated over the given edges
+	int total = std::accumulate(E.begin(),E.end(),0,[](int a, Edge e){return a+e.weight;});
 
-	return 0;
+	return total;
 }
+
+ int minKey(const std::vector<Vertex> & V){
+	 int pos = 0;
+	 int minKey = Vertex::max_key;
+
+	 for(int i=0; i<V.size(); i++){
+		 if (V[i].key < minKey){
+			 minKey = V[i].key;
+			 pos = i;
+		 }
+	 }
+
+	 return pos;
+ }
 
 
 bool printed = false;
@@ -143,11 +173,53 @@ void prim()
 	createGraph(E, V);
 
 	// Todo 5.1c: implement prim algorithm
+
+	//Randomly Chosen Vertex
+	int r = rand() % N; //int r = 42 % N;
+	V[r].key = 0;
+	std::cout << "starting with vertex " << V[r] << "\n";
+
+	std::vector<Vertex> Q = V;
+	std::vector<Edge> A { };
+
+	while(Q.size()>0){
+
+		//Print unvisited vertexes
+		// std::cout << "{ ";
+		// for(auto v : Q){
+		// 	std::cout << v << " ";
+		// }
+		// std::cout << "}\n";
+
+		Vertex u = Q[minKey(Q)];
+		Q.erase(Q.begin() + minKey(Q));
+
+		if (u.parent_index != Vertex::undef){
+			Edge e(u.parent_index, u.index);
+			A.push_back(e);
+		}
+
+		for( auto &v : Q){
+			int w = weight(v.index,u.index);
+			if(w > 0 && w < v.key){
+				v.parent_index = u.index;
+				v.key = w;
+			}
+		}
+
+	}
+
+	std::cout << A << "\n";
+	std::cout << "Total Costs: " << totalWeight(A) << "\n";
+
 }
 
 
 int main(int argc, char** argv)
 {
+	//if we want to start with random vertex
+	std::srand(std::time(0));
+
 	prim();
 
 	return 0;
