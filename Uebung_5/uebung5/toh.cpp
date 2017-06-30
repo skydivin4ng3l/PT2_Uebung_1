@@ -24,78 +24,86 @@ void print()
 	#endif
 
 	// Todo 5.2: Print current state
-	const auto tower_width = N * 3;
-	const auto tower_height = N * 2 + 2;
+	const auto tower_width = N * 2+3;
+	const auto tower_height = N * 2;
 	const char fill = '#';
 	const char space = ' ';
 
-	const std::vector<std::vector<int>> towers_container = { A,B,C };
+	std::vector<std::vector<int>> towers_container = { A,B,C };
+
+	//copied tower containers filled with zeros up to size N for better print handeling
+	for (auto &current_tower : towers_container)
+	{
+		while (current_tower.size() < N)
+		{
+			current_tower.push_back(0);
+		}
+	}
 
 	//Tower body
 	for (int row = 0; row < tower_height; row++)
 	{
-		bool is_vektor_row = row % 2;
-		// empty spacer row
-		if (!is_vektor_row)
+		bool is_disc_row = row % 2;
+		for (auto &current_tower : towers_container)
 		{
-			for (int tower = 1; tower <= 3; tower++)
+			// empty spacer row
+			if (!is_disc_row)
 			{
-				for (int i = 0; i < tower_width/2; i++)
-				{
-					std::cout << space;
-				}
+				std::cout << std::string(tower_width / 2, ' '); //TODO complete Refac
 				std::cout << fill;
+				std::cout << std::string(tower_width / 2 + 1, ' ');
 			}
-			std::cout << std::endl;
-		}
-		// vektor specified row
-		else if (is_vektor_row)
-		{
-			for (auto current_tower : towers_container)
+			// disc slot specified row
+			else if (is_disc_row)
 			{
-				//compensate reversed order of discs
-				int tower_disc_count = current_tower.size();
-				//print space before the disc
-				for (int i = 0; i < tower_width/2-current_tower[tower_disc_count - 1 - (row - 1)]; i++)
+				int disc_space = current_tower.back();
+				current_tower.pop_back();
+				//print space before the disc, compensate reversed order of discs
+				for (int i = 0; i < tower_width/2-disc_space; i++)
 				{
 					std::cout << space;
 				}
 				//print disc
-				for (int j = 0; j < current_tower[tower_disc_count - 1 - (row - 1)]*2+1; j++)
+				for (int j = 0; j < disc_space*2+1; j++)
 				{
 					std::cout << fill;
 				}
 				//print space after the disc + seperator space
-				for (int k = 0; k < tower_width / 2 - current_tower[tower_disc_count - 1 - (row - 1)]+1; k++)
+				for (int k = 0; k < tower_width / 2 - disc_space + 1; k++)
 				{
 					std::cout << space;
 				}
 			}
-			std::cout << std::endl;
+			//Tower base
+			//TODO
 		}
+		std::cout << std::endl;
 	}
-	//Tower base
-	//TODO
+	
 	std::cout << std::endl << std::endl;
 }
 
 void ToH(const int n, const int a, const int b, const int c, int & moves)
 {
+	static std::vector<int>* towers[] = { &A,&B,&C };
 	// Todo 5.2: Implement ToH and print
-	//if (n == 1)
-	//{
-	//	// move disc from a directly to c (no auxiliary stack required)
-	//	//std::cout << "Move " << (char)(’A’ + a) << "->" << (char)(’A’ + c) << std::endl;
-	//}
-	//else
-	//{
-	//	ToH(n - 1, a, c, b); // move n-1 stack of a to stack b
-	//	moves++;
-	//	ToH(1, a, b, c);   // move remaining disc of a to c
-	//	moves++;
-	//	ToH(n - 1, b, a, c); // move n-1 stack b to stack c
-	//	moves++;
-	//}
+	if (n == 1)
+	{
+		// move disc from a directly to c (no auxiliary stack required)
+		//std::cout << "Move " << (char)(’A’ + a) << "->" << (char)(’A’ + c) << std::endl;
+		towers[c]->push_back(towers[a]->back());
+		towers[a]->pop_back();
+		moves++;
+		print();
+		getchar();
+		
+	}
+	else
+	{
+		ToH(n - 1, a, c, b, moves); // move n-1 stack of a to stack b
+		ToH(1, a, b, c, moves);   // move remaining disc of a to c
+		ToH(n - 1, b, a, c, moves); // move n-1 stack b to stack c
+	}
 }
 
 int main(int argc, char ** argv)
