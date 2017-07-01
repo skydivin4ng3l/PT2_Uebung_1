@@ -7,13 +7,36 @@
 #include <cstring>
 #include <cmath>
 
+#define SPACE ' '
+#define FILL '#'
 
 static const auto N = 4;
+static const auto tower_width = N * 2 + 3;
+static const auto tower_height = N * 2;
 
 auto A = std::vector<int>();
 auto B = std::vector<int>();
 auto C = std::vector<int>();
 
+void print_tower_row(int disc_size = 0, char mid_fill = FILL, char side_fill = SPACE)
+{
+	std::cout << std::string(tower_width / 2 - disc_size, side_fill);
+	//disc row
+	if (disc_size > 0)	{
+		//base special case
+		if (mid_fill != FILL) {
+			std::cout << std::string(disc_size, SPACE) << mid_fill << std::string(disc_size, SPACE);
+		}
+		else {
+			std::cout << std::string(disc_size * 2 + 1, mid_fill);
+		}
+	}
+	//space row
+	else {
+		std::cout << mid_fill;
+	}
+	std::cout << std::string(tower_width / 2 - disc_size + 1, side_fill);
+}
 
 void print()
 {
@@ -24,10 +47,6 @@ void print()
 	#endif
 
 	// Todo 5.2: Print current state
-	const auto tower_width = N * 2+3;
-	const auto tower_height = N * 2;
-	const char fill = '#';
-	const char space = ' ';
 
 	std::vector<std::vector<int>> towers_container = { A,B,C };
 
@@ -41,7 +60,7 @@ void print()
 	}
 
 	//Tower body
-	for (int row = 0; row < tower_height; row++)
+	for (int row = 0; row <= tower_height; row++)
 	{
 		bool is_disc_row = row % 2;
 		for (auto &current_tower : towers_container)
@@ -49,37 +68,26 @@ void print()
 			// empty spacer row
 			if (!is_disc_row)
 			{
-				std::cout << std::string(tower_width / 2, ' '); //TODO complete Refac
-				std::cout << fill;
-				std::cout << std::string(tower_width / 2 + 1, ' ');
+				print_tower_row();
 			}
 			// disc slot specified row
 			else if (is_disc_row)
 			{
-				int disc_space = current_tower.back();
+				int disc_size = current_tower.back();
 				current_tower.pop_back();
-				//print space before the disc, compensate reversed order of discs
-				for (int i = 0; i < tower_width/2-disc_space; i++)
-				{
-					std::cout << space;
-				}
-				//print disc
-				for (int j = 0; j < disc_space*2+1; j++)
-				{
-					std::cout << fill;
-				}
-				//print space after the disc + seperator space
-				for (int k = 0; k < tower_width / 2 - disc_space + 1; k++)
-				{
-					std::cout << space;
-				}
+				print_tower_row(disc_size);
 			}
-			//Tower base
-			//TODO
 		}
 		std::cout << std::endl;
 	}
-	
+
+	//Tower base
+	std::cout << std::string((tower_width + 1) *3, FILL) << std::endl;
+	//Tower signatur
+	print_tower_row(1, 'A', '#');
+	print_tower_row(1, 'B', '#');
+	print_tower_row(1, 'C', '#');
+
 	std::cout << std::endl << std::endl;
 }
 
