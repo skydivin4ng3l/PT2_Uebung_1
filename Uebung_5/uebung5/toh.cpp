@@ -35,7 +35,7 @@ void print_tower_row(int disc_size = 0, char mid_fill = FILL, char side_fill = S
 	else {
 		std::cout << mid_fill;
 	}
-	std::cout << std::string(tower_width / 2 - disc_size + 1, side_fill);
+	std::cout << std::string(tower_width / 2 - disc_size, side_fill) << SPACE;
 }
 
 void print()
@@ -82,23 +82,29 @@ void print()
 	}
 
 	//Tower base
-	std::cout << std::string((tower_width + 1) *3, FILL) << std::endl;
+	for (auto current_tower : towers_container)
+	{
+		print_tower_row(0, '#', '#');
+	}
+	std::cout << std::endl;
+
 	//Tower signatur
-	print_tower_row(1, 'A', '#');
-	print_tower_row(1, 'B', '#');
-	print_tower_row(1, 'C', '#');
+	for (char label = 'A'; label < 'D'; label++)
+	{
+		print_tower_row(1, label, '#');
+	}
 
 	std::cout << std::endl << std::endl;
 }
 
 void ToH(const int n, const int a, const int b, const int c, int & moves)
-{
-	static std::vector<int>* towers[] = { &A,&B,&C };
+{	
+	//array of pointers to int vectors
+	static std::vector<int>* towers[] = { &A,&B,&C }; 
 	// Todo 5.2: Implement ToH and print
 	if (n == 1)
 	{
 		// move disc from a directly to c (no auxiliary stack required)
-		//std::cout << "Move " << (char)(’A’ + a) << "->" << (char)(’A’ + c) << std::endl;
 		towers[c]->push_back(towers[a]->back());
 		towers[a]->pop_back();
 		moves++;
