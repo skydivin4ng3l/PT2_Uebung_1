@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <string>
 
+#include <iomanip>
+
 
 struct Interval
 {
@@ -29,33 +31,23 @@ std::ostream & operator<<(std::ostream & os, const std::vector<Interval> & I)
 {
 	// Todo 5.3: Implement a nice print function
 	//blocks
-	char free_slot = '"';
+	char free_slot = '-';
 	char blocked_slot = '#';
 
 	for (auto current_interval : I)
 	{
-		std::string index = (current_interval.index < 10 ? std::to_string(current_interval.index) + " " 
-														 : std::to_string(current_interval.index) );
-		os << "Interval: " << index << " [";
+		//print left padded index
+		os << "# " << std::left << std::setw(2) << current_interval.index;
+
 		//until start
-		for (int slot = 0; slot < current_interval.start; slot++)
-		{
-			os << free_slot;
-		}
+		os << " ["<< std::string(current_interval.start, free_slot);
 
 		//until end
-		for (int slot = current_interval.start; slot < current_interval.end; slot++)
-		{
-			os << blocked_slot;
-		}
+		os << std::string(current_interval.end - current_interval.start +1, blocked_slot);
 
 		//until MaxEnd
-		for (int slot = current_interval.end; slot < MaxEnd; slot++)
-		{
-			os << free_slot;
-		}
+		os << std::string(MaxEnd - current_interval.end, free_slot)<< "]" << std::endl;
 
-		os << "]" << std::endl;
 	}
 	os << I.size() << std::endl;
 	return os;
@@ -92,7 +84,7 @@ void schedule(const std::vector<Interval> & intervals)
 
 	//add the interval with the earliest end time, first interval of sorted will be added anyway
 	Interval last_added_interval = sorted.front();
-	sorted.push_back(sorted.front());
+	scheduled.push_back(sorted.front());
 
 	for (auto current_interval :sorted)
 	{
