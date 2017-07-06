@@ -6,33 +6,131 @@
 
 #include <vector>
 
-struct Vector3d
+class Vector3d
 {
+private:
 	double x_;
 	double y_;
 	double z_;
-};
 
-Vector3d plus(const Vector3d& v1, const Vector3d& v2)
-{
-	return Vector3d{v1.x_ + v2.x_, v1.y_ + v2.y_, v1.z_ + v2.z_};
-}
+public:
 
-Vector3d minus(const Vector3d& v1, const Vector3d& v2)
-{
-	return Vector3d{v1.x_ - v2.x_, v1.y_ - v2.y_, v1.z_ - v2.z_};
-}
+	Vector3d(): x_{0}, y_{0}, z_{0} {}
+	Vector3d(double x, double y, double z): x_{x}, y_{y}, z_{z} {}
 
-Vector3d times(const Vector3d& v, double scalar)
-{
-	return Vector3d{v.x_ * scalar, v.y_ * scalar, v.z_ * scalar};
-}
+	//read
+	double operator[](int i) const{
+		assert(i>=0 && i<=2);
 
-Vector3d divide(const Vector3d& v, double scalar)
-{
-	assert(scalar);
-	return Vector3d{v.x_ / scalar, v.y_ / scalar, v.z_ / scalar};
-}
+		switch (i) {
+			case 0: return x_;
+			case 1: return y_;
+			case 2: return z_;
+			default: return -1; //Never going to happen because of assert, but avoid compiler warning
+		}
+	}
+
+	//write
+	double& operator[](int i){
+		assert(i>=0 && i<=2);
+
+		switch (i) {
+			case 0: return x_;
+			case 1: return y_;
+			case 2: return z_;
+		}
+		
+	}
+
+	Vector3d operator=(const Vector3d& v)
+	{
+		this->x_ = v[0];
+		this->y_ = v[1];
+		this->z_ = v[2];
+
+		return *this;
+	}
+
+	Vector3d operator+(const Vector3d& v) const
+	{
+		return Vector3d{this->x_ + v.x_, this->y_ + v.y_, this->z_ + v.z_};
+	}
+
+	Vector3d operator+=(const Vector3d& v)
+	{
+		*this = *this + v;
+		return *this;
+	}
+
+	Vector3d operator-(const Vector3d& v) const
+	{
+		return Vector3d{this->x_ - v.x_, this->y_ - v.y_, this->z_ - v.z_};
+	}
+
+	Vector3d operator-=(const Vector3d& v)
+	{
+		*this = *this - v;
+		return *this;
+	}
+
+	Vector3d operator*(double scalar) const
+	{
+		return Vector3d{this->x_ * scalar, this->y_ * scalar, this->z_ * scalar};
+	}
+
+	Vector3d operator*=(const double scalar)
+	{
+		*this = *this * scalar;
+		return *this;
+	}
+
+	Vector3d operator/(double scalar) const
+	{
+		assert(scalar);
+		return Vector3d{this->x_ / scalar, this->y_ / scalar, this->z_ / scalar};
+	}
+
+	Vector3d operator/=(double scalar)
+	{
+		*this = *this / scalar;
+		return *this;
+	}
+
+	Vector3d operator-() const
+	{
+		return *this * -1;
+	}
+
+	bool operator==(Vector3d& v) const
+	{
+		return this->x_ == v[0] && this->y_ == v[1] && this->z_ == v[2];
+	}
+
+	bool operator!=(Vector3d& v) const
+	{
+		return !(*this==v);
+	}
+
+	friend Vector3d cross(const Vector3d& v1, const Vector3d& v2);
+	friend double dot(const Vector3d& v1, const Vector3d& v2);
+
+	double length(const Vector3d& v)
+	{
+		return std::sqrt(dot(v, v));
+	}
+
+	void normalize()
+	{
+		double len = length(*this);
+		*this /= len;
+	}
+
+	void print(Vector3d& v)
+	{
+		std::cout << "(" << v.x_ << "," << v.y_ << "," << v.z_ << ")" << std::endl;
+	}
+
+}; //end class
 
 Vector3d cross(const Vector3d& v1, const Vector3d& v2)
 {
@@ -47,32 +145,32 @@ double dot(const Vector3d& v1, const Vector3d& v2)
 	return v1.x_ * v2.x_ + v1.y_ * v2.y_ + v1.z_ * v2.z_;
 }
 
-double length(const Vector3d& v)
+Vector3d operator*(double scalar, const Vector3d v)
 {
-	return std::sqrt(dot(v, v));
+	return v * scalar;
 }
 
-void normalize(Vector3d& v)
-{
-	double len = length(v);
-	v = divide(v, len);
+std::ostream& operator<<(std::ostream& os, Vector3d v) {
+	os << "(" << v[0] << "," << v[1] << "," << v[2] << ")";
+
+	//alternativly
+	//print(v); // but this goes only to cout, a variable ostream is better
+	return os;
 }
 
-void print(Vector3d& v)
-{
-	std::cout << "(" << v.x_ << "," << v.y_ << "," << v.z_ << ")" << std::endl;
-}
+
 
 //
 // some tests for Vector3d
 //
-/*void test()
+void test()
 {
 	// test default constructor
 	Vector3d v1;
 	std::cout << "test: default ctor" << std::endl;
 	std::cout << "(0.0,0.0,0.0):\t" << v1 << std::endl;
 	assert(v1[0] == 0.0 && v1[1] == 0.0 && v1[2] == 0.0);
+
 
 	// test init-list
 	std::cout << "\ntest: init-list ctor" << std::endl;
@@ -151,10 +249,10 @@ void print(Vector3d& v)
 	double sp2 = dot(v100,v100);
 	std::cout << v100 << "." << v100 << " = " << sp2 << std::endl;
 	assert(sp2 == 1);
-}*/
+}
 
 int main(int argc, char** argv)
 {
-	//test();
+	test();
 	return 0;
 }
