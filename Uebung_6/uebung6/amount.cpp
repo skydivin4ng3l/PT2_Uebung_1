@@ -5,7 +5,7 @@
 #include <iomanip> //std::setprecision
 
 #define NORMAL_TAXRATE 19
-#define REDUCED_TAXERATE 7
+#define REDUCED_TAXRATE 7
 #define DEFAULT_CUR EUR
 #define TRADECOURSE 1.142325  //EUR * TRADECOURSE = USD
 
@@ -13,13 +13,12 @@ class Amount
 {
 	public:
 		enum currency { USD, EUR };
-		enum taxeRate { REDUCED = REDUCED_TAXERATE,
+		enum taxRate { REDUCED = REDUCED_TAXRATE,
 										NORMAL 	= NORMAL_TAXRATE };
-	// Todo 6.2
-	// Implement class Amount
+
 	private:
 		currency cur_;
-		taxeRate tr_;
+		taxRate tr_;
 		double brutto_;
 		double netto_;
 		std::string label_;
@@ -27,9 +26,9 @@ class Amount
 	public:
 		Amount(): cur_{DEFAULT_CUR}, tr_{NORMAL}, netto_{0.0}, brutto_{0.0}, label_{"Nothing"} {}
 		Amount(std::string l, double n): cur_{DEFAULT_CUR}, tr_{NORMAL}, netto_{n}, brutto_{n*(static_cast<double>(tr_+100)/100)}, label_{l} {}
-		Amount(std::string l, double n, taxeRate t): cur_{DEFAULT_CUR}, tr_{t}, netto_{n}, brutto_{n*(static_cast<double>(tr_+100)/100)}, label_{l} {}
+		Amount(std::string l, double n, taxRate t): cur_{DEFAULT_CUR}, tr_{t}, netto_{n}, brutto_{n*(static_cast<double>(tr_+100)/100)}, label_{l} {}
 		Amount(std::string l, double n, currency c): cur_{c}, tr_{NORMAL}, netto_{n}, brutto_{n*(static_cast<double>(tr_+100)/100)}, label_{l} {}
-		Amount(std::string l, double n, currency c, taxeRate t): cur_{c}, tr_{t}, netto_{n}, brutto_{n*(static_cast<double>(tr_+100)/100)}, label_{l} {}
+		Amount(std::string l, double n, currency c, taxRate t): cur_{c}, tr_{t}, netto_{n}, brutto_{n*(static_cast<double>(tr_+100)/100)}, label_{l} {}
 
 		std::string getLabel(){
 			return label_;
@@ -43,8 +42,12 @@ class Amount
 			return netto_;
 		}
 
-		taxeRate getTaxRate(){
+		taxRate getTaxRate(){
 			return tr_;
+		}
+
+		inline double getTaxFactor(){
+			return (static_cast<double>(tr_+100)/100);
 		}
 
 		currency getCurrency(){
@@ -84,49 +87,132 @@ class Amount
 
 		void setNetto(double n){
 			netto_ = n;
-			brutto_ = n*(static_cast<double>(tr_+100)/100);
+			brutto_ = n * this->getTaxFactor();
 		}
 
-		void setTaxRate(taxeRate t){
+		void setNetto(double n, currency c){
+			this->setCurrency(c);
+			this->setNetto(n);
+		}
+
+		void setTaxRate(taxRate t){
 			tr_ = t;
-			brutto_ = this->getNetto() * (static_cast<double>(tr_+100)/100);
+			brutto_ = this->getNetto() * this->getTaxFactor();
+		}
+
+		void setLabel(std::string s){
+			label_ = s;
 		}
 };
 
 std::ostream& operator<<(std::ostream& os, Amount::currency c){
 	switch (c) {
-		case Amount::EUR : os << "EUR"; break;
-		case Amount::USD : os << "USD"; break;
+		case Amount::EUR : os << "€"; break;
+		case Amount::USD : os << "$"; break;
 		default: os << "";
 	}
 	return os;
 }
 
 std::ostream& operator<<(std::ostream& os, Amount a) {
-	os << "\"" << a.getLabel() << "\"" << std::endl;
-	os << "Brutto: " << std::fixed << std::setprecision(2) << a.getBrutto() << a.getCurrency() << std::endl;
-	os << "Netto: " << std::fixed << std::setprecision(2) << a.getNetto() << a.getCurrency() << std::endl;
-	os << "TaxeRate: " << a.getTaxRate() << "%" << std::endl;
+	os << "Label:\t\"" << a.getLabel() << "\"" << std::endl;
+	os << "Brutto:\t " << std::fixed << std::setprecision(2) << a.getBrutto() << a.getCurrency() << std::endl;
+	os << "Netto:\t " << std::fixed << std::setprecision(2) << a.getNetto() << a.getCurrency() << std::endl;
+	os << "TaxRate: " << a.getTaxRate() << "%" << std::endl;
 
 	return os;
 }
+
 
 void test()
 {
 	// Todo 6.2
 	// Implement tests
 
+	//Default constructor
 	Amount empty;
+	std::cout << "Test default constructor" << std::endl;
 	std::cout << empty << std::endl;
 	assert(empty.getNetto()==0 && empty.getBrutto() == 0 && empty.getTaxRate()==NORMAL_TAXRATE
 				 && empty.getCurrency()==Amount::EUR);
 
-
-	Amount a {"Mango", 1.20};
+	//Contructor
+	Amount a {"Mango", 1.0};
+	std::cout << "Test constructor(label,netto)" << std::endl;
+	std::cout << "Example constructor(\"Mango\",1.0)" << std::endl;
 	std::cout << a << std::endl;
-	assert(a.getNetto()==1.2 && a.getBrutto() == 1.2*1.19 && a.getTaxRate()==Amount::NORMAL
+	assert(a.getNetto()==1.0 && a.getBrutto() == 1.0*a.getTaxFactor() && a.getTaxRate()==Amount::NORMAL
 				 && a.getCurrency()==Amount::EUR && a.getLabel().compare("Mango") == 0);
 
+	//Contructor
+ 	Amount a1 {"Mango", 1.0, Amount::USD};
+  std::cout << "Test constructor(label,netto,currency)" << std::endl;
+	std::cout << "Example constructor(\"Mango\",1.0,USD)" << std::endl;
+  std::cout << a1 << std::endl;
+  assert(a1.getNetto()==1.0 && a1.getBrutto() == 1.0*a1.getTaxFactor() && a1.getTaxRate()==Amount::NORMAL
+ 	 		  && a1.getCurrency()==Amount::USD && a1.getLabel().compare("Mango") == 0);
+
+	//Contructor
+	Amount a2 {"Mango", 1.0, Amount::REDUCED};
+  std::cout << "Test constructor(label,netto,taxrate)" << std::endl;
+	std::cout << "Example constructor(\"Mango\",1.0,REDUCED)" << std::endl;
+  std::cout << a2 << std::endl;
+  assert(a2.getNetto()==1.0 && a2.getBrutto() == 1.0*a2.getTaxFactor() && a2.getTaxRate()==Amount::REDUCED
+ 	 		  && a2.getCurrency()==Amount::EUR && a2.getLabel().compare("Mango") == 0);
+
+	//Contructor
+	Amount a3 {"Mango", 1.0, Amount::EUR, Amount::REDUCED};
+	std::cout << "Test constructor(label,netto,currency,taxrate)" << std::endl;
+	std::cout << "Example constructor(\"Mango\",1.0,EUR,REDUCED)" << std::endl;
+	std::cout << a3 << std::endl;
+	assert(a3.getNetto()==1.0 && a3.getBrutto() == 1.0*1.07 && a3.getTaxRate()==Amount::REDUCED
+	 			 && a3.getCurrency()==Amount::EUR && a3.getLabel().compare("Mango") == 0);
+
+	 //setCurrency()
+	std::cout << "Change Currency from EUR to USD" << std::endl;
+	std::cout << "Brutto:\t" << a3.getBrutto() << a3.getCurrency() << " -> " << a3.getTradedBrutto() << "$" << std::endl;
+	std::cout << "Netto:\t"  << a3.getNetto()  << a3.getCurrency() << " -> " << a3.getTradedNetto()  << "$" << std::endl;
+	a3.setCurrency(Amount::USD);
+	std::cout << a3 << std::endl;
+	assert(a3.getNetto() == 1.0*TRADECOURSE && a3.getBrutto() == 1.07*TRADECOURSE  && a3.getCurrency()==Amount::USD);
+
+	//setNetto()
+	std::cout << "Change Netto to 1 and let current currency" << std::endl;
+	std::cout << "\tBrutto:\t"  << "Netto:\t" << std::endl;
+	std::cout << "from\t" << a3.getBrutto() << a3.getCurrency() << "\t" << a3.getNetto() << a3.getCurrency() << std::endl;
+	a3.setNetto(1);
+	std::cout << "to\t" << a3.getBrutto() << a3.getCurrency() << "\t" << a3.getNetto() << a3.getCurrency() << std::endl << std::endl;
+	assert(a3.getNetto() == 1.0 && a3.getBrutto() == 1.0*a3.getTaxFactor());
+
+
+	//setNetto() with specific currency
+	std::cout << "Change Netto to 2EUR" << std::endl;
+	std::cout << "\tBrutto:\t"  << "Netto:\t" << std::endl;
+	std::cout << "from\t" << a3.getBrutto() << a3.getCurrency() << "\t" << a3.getNetto() << a3.getCurrency() << std::endl;
+	a3.setNetto(2,Amount::EUR);
+	std::cout << "to\t" << a3.getBrutto() << a3.getCurrency() << "\t  " << a3.getNetto() << a3.getCurrency() << std::endl << std::endl;
+	assert(a3.getNetto() == 2.0 && a3.getBrutto() == 2.0*a3.getTaxFactor() && a3.getCurrency()==Amount::EUR);
+
+	//setTaxRate()
+	std::cout << "Change Tax Rate from REDUCED to NORMAL" << std::endl;
+	std::cout << "Brutto:\tNetto:\tTaxRate" << std::endl;
+	std::cout << a3.getBrutto() << a3.getCurrency() << "\t " << a3.getNetto() << a3.getCurrency() << "\t" << a3.getTaxRate() << "%" << std::endl;
+	a3.setTaxRate(Amount::NORMAL);
+	std::cout << a3.getBrutto() << a3.getCurrency() << "\t " << a3.getNetto() << a3.getCurrency() << "\t" << a3.getTaxRate() << "%" << std::endl << std::endl;
+	assert(a3.getBrutto() == 2.0*a3.getTaxFactor() && a3.getTaxRate() == Amount::NORMAL);
+
+	//setLabel()
+	std::cout << "Change label from \"Mango\" to \"New Mango\"" <<std::endl;
+	std::cout << "\"" << a3.getLabel() << "\" -> ";
+	a3.setLabel("New Mango");
+	std::cout << "\"" << a3.getLabel() << std::endl << std::endl;
+	assert(a3.getLabel().compare("New Mango") == 0);
+
+	//getTaxAmount()
+	std::cout << "Get the amount of tax of the brutto price" << std::endl;
+	std::cout << "Brutto - Netto = TaxAmount" << "\""<< std::endl;
+	std::cout << a3.getBrutto() << a3.getCurrency() << " - " << a3.getNetto() << a3.getCurrency() << " = " << a3.getTaxAmount() << a3.getCurrency() << std::endl;
+	assert(a3.getBrutto() - a3.getNetto() == a3.getTaxAmount());
 }
 
 int main()
