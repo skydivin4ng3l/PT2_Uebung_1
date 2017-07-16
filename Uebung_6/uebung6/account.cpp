@@ -75,41 +75,42 @@ public:
 	virtual bool credit(double amount) override;
 	virtual bool debit(double amount) override;
 
-	const list<pair<std::string, double>>& transactions();
+	const list<pair<std::string, double>> transactions();
 
 private:
-	list<pair<std::string, double>> transaction_list;
+	list<pair<std::string, double>> transaction_list_;
 };
 
 //inherited Class Methodes
 //ctor
 LoggedAccount::LoggedAccount(long accountNo, double balance, double limit, bool locked) :
 	Account(accountNo, balance, limit, locked),
-	transaction_list{ make_pair("**initial balance**",balance) }
+	transaction_list_{ make_pair("**initial balance**",balance) }
 {}
 
 //transactions
-const list<pair<std::string, double>>& LoggedAccount::transactions()
+const list<pair<std::string, double>> LoggedAccount::transactions()
 {
-	transaction_list.push_back(make_pair("**current balance**", balance()));
-	return transaction_list;
+	list<pair<std::string, double>> temp_list = transaction_list_;
+	temp_list.push_back(make_pair("**current balance**", balance()));
+	return temp_list;
 }
 
 //Overrides
 void LoggedAccount::setLimit(double limit)
 {
 	Account::setLimit(limit);
-	transaction_list.push_back(make_pair("**set limit**", getLimit()));
+	transaction_list_.push_back(make_pair("**set limit**", getLimit()));
 }
 
 bool LoggedAccount::credit(double amount)
 {
 	bool successful = Account::credit(amount);
 	if (successful){ 
-		transaction_list.push_back(make_pair("**credit**", amount));
+		transaction_list_.push_back(make_pair("**credit**", amount));
 		return successful;
 	}
-	transaction_list.push_back(make_pair("**credit - failed - account locked**", amount));
+	transaction_list_.push_back(make_pair("**credit - failed - account locked**", amount));
 	return successful;
 }
 
@@ -117,10 +118,10 @@ bool LoggedAccount::debit(double amount)
 {
 	bool successful = Account::debit(amount);
 	if (successful) {
-		transaction_list.push_back(make_pair("**debit**", amount));
+		transaction_list_.push_back(make_pair("**debit**", amount));
 		return successful;
 	}
-	transaction_list.push_back(make_pair("**debit - failed - account locked or insufficent funds**", amount));
+	transaction_list_.push_back(make_pair("**debit - failed - account locked or insufficent funds**", amount));
 	return successful;
 }
 
