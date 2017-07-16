@@ -19,16 +19,15 @@ class Amount
 	private:
 		currency cur_;
 		taxRate tr_;
-		double brutto_;
 		double netto_;
 		std::string label_;
 
 	public:
-		Amount(): cur_{DEFAULT_CUR}, tr_{NORMAL}, netto_{0.0}, brutto_{0.0}, label_{"Nothing"} {}
-		Amount(std::string l, double n): cur_{DEFAULT_CUR}, tr_{NORMAL}, netto_{n}, brutto_{n*(static_cast<double>(tr_)+100.0)/100.0}, label_{l} {}
-		Amount(std::string l, double n, taxRate t): cur_{DEFAULT_CUR}, tr_{t}, netto_{n}, brutto_{n*(static_cast<double>(tr_)+100.0)/100.0}, label_{l} {}
-		Amount(std::string l, double n, currency c): cur_{c}, tr_{NORMAL}, netto_{n}, brutto_{n*(static_cast<double>(tr_)+100.0)/100.0}, label_{l} {}
-		Amount(std::string l, double n, currency c, taxRate t): cur_{c}, tr_{t}, netto_{n}, brutto_{n*(static_cast<double>(tr_)+100.0)/100.0}, label_{l} {}
+		Amount(): cur_{DEFAULT_CUR}, tr_{NORMAL}, netto_{0.0}, label_{"Nothing"} {}
+		Amount(std::string l, double n): cur_{DEFAULT_CUR}, tr_{NORMAL}, netto_{n}, label_{l} {}
+		Amount(std::string l, double n, taxRate t): cur_{DEFAULT_CUR}, tr_{t}, netto_{n}, label_{l} {}
+		Amount(std::string l, double n, currency c): cur_{c}, tr_{NORMAL}, netto_{n}, label_{l} {}
+		Amount(std::string l, double n, currency c, taxRate t): cur_{c}, tr_{t}, netto_{n}, label_{l} {}
 
 		//Copy assignment
 		Amount& operator=(const Amount& a){
@@ -43,7 +42,6 @@ class Amount
 			if(cur_!=a.cur_) return false;
 			if(tr_!=a.tr_) return false;
 			if(netto_!=a.netto_) return false;
-			if(brutto_!=a.brutto_) return false;
 			if(label_.compare(a.label_) != 0) return false;
 
 			return true;
@@ -54,7 +52,7 @@ class Amount
 		}
 
 		double getBrutto(){
-			return brutto_;
+			return this->getNetto()*(static_cast<double>(tr_)+100.0)/100.0;
 		}
 
 		double getNetto(){
@@ -87,14 +85,14 @@ class Amount
 
 		double getTradedBrutto(){
 			switch (cur_) {
-				case EUR: return brutto_ * TRADECOURSE;
-				case USD: return brutto_ / TRADECOURSE;
+				case EUR: return this->getBrutto() * TRADECOURSE;
+				case USD: return this->getBrutto() / TRADECOURSE;
 				default: return -1;
 			}
 		}
 
 		double getTaxAmount(){
-			return brutto_ - netto_;
+			return netto_ * static_cast<double> (tr_)/100.0;
 		}
 
 		void setCurrency(currency c){
@@ -106,7 +104,6 @@ class Amount
 
 		void setNetto(double n){
 			netto_ = n;
-			brutto_ = n * this->getTaxFactor();
 		}
 
 		void setNetto(double n, currency c){
@@ -116,7 +113,6 @@ class Amount
 
 		void setTaxRate(taxRate t){
 			tr_ = t;
-			brutto_ = this->getNetto() * this->getTaxFactor();
 		}
 
 		void setLabel(std::string s){
@@ -239,7 +235,7 @@ void test()
 	std::cout << "Get the amount of tax of the brutto price" << std::endl;
 	std::cout << "Brutto - Netto = TaxAmount" << "\""<< std::endl;
 	std::cout << a3.getBrutto() << a3.getCurrency() << " - " << a3.getNetto() << a3.getCurrency() << " = " << a3.getTaxAmount() << a3.getCurrency() << std::endl;
-	assert(a3.getBrutto() - a3.getNetto() == a3.getTaxAmount());
+	assert((static_cast<double>(a3.getTaxRate()) / 100.0 * a3.getNetto()) == a3.getTaxAmount());
 }
 
 int main()
