@@ -1,6 +1,7 @@
 #include <iostream>
 #include <assert.h>
 #include <unordered_map>
+#include <map>
 #include <set>
 
 using namespace std;
@@ -10,7 +11,7 @@ template<class T, class stamp_type = unsigned long>
 class StampedSet {
 private:
 	std::unordered_map<T, std::set<stamp_type>> mapObjectStampSet_;
-	std::unordered_map<stamp_type, T> mapStampObject_;
+	std::map<stamp_type, T> mapStampObject_;
 	stamp_type nextStamp_;
 
 public:
@@ -32,7 +33,7 @@ public:
 			search->second.insert(nextStamp_);
 			mapStampObject_.insert({ nextStamp_,obj });
 		}
-		
+
 		return nextStamp_++;
 	}
 
@@ -46,8 +47,14 @@ public:
 	}
 
 	void eraseStamp(const stamp_type stamp) {
-		mapObjectStampSet_.at(mapStampObject_.at(stamp)).erase(stamp);
+		assert(this->containsStamp(stamp));
+		T obj = mapStampObject_.at(stamp);
+		assert(this->containsObject(obj));
+		mapObjectStampSet_.at(obj).erase(stamp);
 		mapStampObject_.erase(stamp);
+
+		if ( mapObjectStampSet_.at(obj).size() == 0 )
+			this->add(obj);
 	}
 
 	unsigned long noOfObjects() const {
@@ -74,21 +81,17 @@ public:
 
 	const T& findObject(const stamp_type& s) const {
 		assert(this->containsStamp(s));
-		auto search = mapStampObject_.find(s);
-		return search->second;
+		return mapStampObject_.at(s);
 	}
 
 	stamp_type lastStamp(const T& obj) const {
 		assert(this->containsObject(obj));
-		auto search = mapObjectStampSet_.find(obj);
-		return *(search->second.rbegin());
-		
+		return *(mapObjectStampSet_.at(obj).rbegin());
 	}
 
 	stamp_type firstStamp(const T& obj) const {
 		assert(this->containsObject(obj));
-		auto search = mapObjectStampSet_.find(obj);
-		return *(search->second.begin());
+		return *(mapObjectStampSet_.at(obj).begin());
 	}
 
 	stamp_type nextStamp() const {
@@ -98,20 +101,28 @@ public:
 	template<typename L>
 	void process(const T& obj, L&& fct) {
 		assert(this->containsObject(obj));
-		for (auto& it : mapObjectStampSet_.at(obj)) {
-			if (fct(obj, it)) 
-				this->eraseStamp(it);
+
+		for (auto it = mapObjectStampSet_.at(obj).begin(); it != mapObjectStampSet_.at(obj).end() ;) {
+			if ( fct(obj, *it) ){
+				this->eraseStamp(*(it++)); //postincrement indispensable here, to save the validity of iterator
+																	 //erase of set invalidates the references to the erased element
+			}
+			else
+				++it;
 		}
 	}
 
 	template<typename L>
 	void process(stamp_type from, stamp_type to, L&& fct) {
-		assert(this->containsStamp(from) && this->containsStamp(to));
-		auto from_it = mapStampObject_.find(from);
-		auto to_it = mapStampObject_.find(to);
-		for (auto it = from_it; it != to_it; it++) {
-			if ( fct(it->second, it->first) )
-				this->eraseStamp(it->first);
+		auto from_it = mapStampObject_.lower_bound(from);
+		auto to_it = mapStampObject_.upper_bound(to);
+		for (auto it = from_it; it != to_it;) {
+			if ( fct(it->second, it->first) ){
+				this->eraseStamp((it++)->first); //postincrement indispensable here, to save the validity of iterator
+																	 			 //erase of set invalidates the references to the erased element
+			}
+			else
+				++it;
 		}
 	}
 
@@ -166,6 +177,7 @@ void test() {
 
 	// test process deletion
 	f = 3.14f; sfs.process(f, [](float f, int i){ return true; }); assert(sfs.lastStamp(f) == 18);
+
 	sfs.process(1, 7, [](float f, int i){ return f < 6.0f; }); assert(sfs.lastStamp(5.01f) == 19); assert(sfs.firstStamp(9.99f) == 1); assert(sfs.firstStamp(1.11f) == 8);
 
 	// check different instantiations
