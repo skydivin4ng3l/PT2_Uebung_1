@@ -39,8 +39,7 @@ public:
 
 	void erase(const T& obj) {
 		assert(this->containsObject(obj));
-		auto search = mapObjectStampSet_.find(obj);
-		for (auto& it : search->second) {
+		for (auto& it : mapObjectStampSet_.at(obj)) {
 			mapStampObject_.erase(it);
 		}
 		mapObjectStampSet_.erase(obj);
@@ -50,6 +49,7 @@ public:
 		assert(this->containsStamp(stamp));
 		T obj = mapStampObject_.at(stamp);
 		assert(this->containsObject(obj));
+		
 		mapObjectStampSet_.at(obj).erase(stamp);
 		mapStampObject_.erase(stamp);
 
